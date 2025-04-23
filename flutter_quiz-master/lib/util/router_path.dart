@@ -16,3 +16,5 @@ const String AddQuestionPackageScreens = 'AddQuestionPackageScreens';
 const String QuestionPackageListScreens = 'QuestionPackageListScreen';
 const String QuizScreenH = 'QuizScreenH';
 const String ResultExamScreens = 'ResultScreen';
+const String UserExamResultScreenss = 'UserExamResultScreens';
+const String ManageUserScreenss = 'ManageUserScreens';

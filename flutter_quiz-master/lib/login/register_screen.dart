@@ -25,6 +25,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _departmentController = TextEditingController();
   final _detailController = TextEditingController();
   bool _isPasswordVisible = false;
+  final _fullNameController = TextEditingController(); // thêm dòng này
 
   @override
   Widget build(BuildContext context) {
@@ -110,6 +111,9 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                         ),
                         const SizedBox(height: 16),
+                        _buildTextField(
+                            'Họ và tên', _fullNameController, Icons.person),
+                        const SizedBox(height: 16),
                         _buildTextField('Tên đăng nhập', _usernameController,
                             Icons.person_outline),
                         const SizedBox(height: 16),
@@ -118,8 +122,34 @@ class _RegisterPageState extends State<RegisterPage> {
                         _buildPasswordField(
                             'Nhập lại mật khẩu', _confirmPasswordController),
                         const SizedBox(height: 16),
-                        _buildTextField('Phòng ban', _departmentController,
-                            Icons.apartment),
+                        DropdownButtonFormField<String>(
+                          value: _departmentController.text.isNotEmpty
+                              ? _departmentController.text
+                              : null,
+                          decoration: InputDecoration(
+                            labelText: 'Phòng ban',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.apartment),
+                          ),
+                          items: [
+                            'Ban Tham Mưu',
+                            'Ban Chính Trị',
+                            'Ban HC-KT',
+                          ].map((dept) {
+                            return DropdownMenuItem<String>(
+                              value: dept,
+                              child: Text(dept),
+                            );
+                          }).toList(),
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Vui lòng chọn phòng ban'
+                              : null,
+                          onChanged: (value) {
+                            setState(() {
+                              _departmentController.text = value!;
+                            });
+                          },
+                        ),
                         const SizedBox(height: 16),
                         _buildTextField(
                             'Đơn vị', _detailController, Icons.business),
@@ -142,6 +172,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                       department:
                                           _departmentController.text.trim(),
                                       detail: _detailController.text.trim(),
+                                      fullname: _fullNameController.text.trim(),
                                     ));
                               }
                             },

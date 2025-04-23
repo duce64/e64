@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 const kPrimaryColor = Color(0xFF1976D2);
@@ -7,14 +8,14 @@ const kLightBackground = Color(0xFFE9F1FB);
 const kCardBackground = Colors.white;
 const kTitleColor = Color(0xFF002856);
 
-class ExamResultScreen extends StatefulWidget {
-  const ExamResultScreen({Key? key}) : super(key: key);
+class UserExamResultScreen extends StatefulWidget {
+  const UserExamResultScreen({Key? key}) : super(key: key);
 
   @override
-  State<ExamResultScreen> createState() => _ExamResultScreenState();
+  State<UserExamResultScreen> createState() => _UserExamResultScreenState();
 }
 
-class _ExamResultScreenState extends State<ExamResultScreen> {
+class _UserExamResultScreenState extends State<UserExamResultScreen> {
   List<Map<String, dynamic>> _results = [];
   bool _isLoading = true;
   String? _error;
@@ -22,13 +23,27 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchResults(); // Gọi API khi khởi tạo
+    _fetchResultsByUserId();
   }
 
-  Future<void> _fetchResults() async {
+  Future<void> _fetchResultsByUserId() async {
     try {
-      final response =
-          await http.get(Uri.parse('http://192.168.52.91:3000/api/results'));
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+
+      if (token == null) throw Exception("Token không tồn tại");
+
+      final parts = token.split('.');
+      if (parts.length != 3) throw Exception("Token không hợp lệ");
+
+      final payload = base64Url.normalize(parts[1]);
+      final decoded = jsonDecode(utf8.decode(base64Url.decode(payload)));
+      final userId = decoded['userId'];
+
+      final response = await http.get(
+        Uri.parse('http://192.168.52.91:3000/api/results/by-user/$userId'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
 
       if (response.statusCode == 200) {
         final List data = jsonDecode(response.body);
@@ -56,7 +71,7 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
         elevation: 1,
         iconTheme: const IconThemeData(color: kTitleColor),
         title: const Text(
-          "📋 Kết quả thi",
+          "📋 Kết quả của tôi",
           style: TextStyle(
             color: kTitleColor,
             fontWeight: FontWeight.bold,

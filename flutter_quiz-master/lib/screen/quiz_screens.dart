@@ -8,13 +8,16 @@ import 'package:flutterquiz/widget/snackbar.dart';
 import 'package:flutterquiz/screen/quiz_finish_screen.dart';
 import 'package:flutterquiz/widget/awesomedialog.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class QuizPageApi extends StatefulWidget {
   final int categoryId;
+  final int questionId;
 
   const QuizPageApi({
     Key? key,
     required this.categoryId,
+    required this.questionId,
   }) : super(key: key);
 
   @override
@@ -37,10 +40,9 @@ class _QuizPageApiState extends State<QuizPageApi> {
   }
 
   Future<void> fetchQuestions() async {
-    print("Fetching questions... ${widget.categoryId}");
     final dio = Dio();
     final url =
-        "http://192.168.52.91:3000/api/questions/package/${widget.categoryId}";
+        "http://192.168.52.91:3000/api/questions/package/${widget.questionId}";
 
     try {
       setState(() => isLoading = true);
@@ -50,7 +52,6 @@ class _QuizPageApiState extends State<QuizPageApi> {
         final List<dynamic> results = res.data['result'];
         listQuestion = results.map((e) => Question.fromJson(e)).toList();
 
-        // Shuffle once and store
         for (int i = 0; i < listQuestion.length; i++) {
           final q = listQuestion[i];
           final List<String> options = [
@@ -61,9 +62,7 @@ class _QuizPageApiState extends State<QuizPageApi> {
           shuffledOptions[i] = options;
         }
 
-        setState(() {
-          isLoading = false;
-        });
+        setState(() => isLoading = false);
       } else {
         setState(() {
           error = 'Failed to load questions';
@@ -85,7 +84,7 @@ class _QuizPageApiState extends State<QuizPageApi> {
     });
   }
 
-  void nextOrSubmit() {
+  void nextOrSubmit() async {
     if (answer[currentIndex] == null) {
       SnackBars.buildMessage(context, "Please choose an answer!");
       return;
@@ -97,7 +96,8 @@ class _QuizPageApiState extends State<QuizPageApi> {
         "Finish?",
         "Are you sure you want to finish the quiz?",
         DialogType.success,
-        () {
+        () async {
+          await submitExamResult();
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -115,6 +115,52 @@ class _QuizPageApiState extends State<QuizPageApi> {
       setState(() {
         currentIndex++;
       });
+    }
+  }
+
+  Future<void> submitExamResult() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    if (token == null) return;
+
+    final parts = token.split('.');
+    String name = 'Unknown';
+    String userId = '';
+    if (parts.length == 3) {
+      final payload = base64Url.normalize(parts[1]);
+      final decoded = jsonDecode(utf8.decode(base64Url.decode(payload)));
+      name = decoded['name'] ?? 'Unknown';
+      userId = decoded['userId'] ?? ''; // phải là ObjectId từ backend
+    }
+
+    int score = 0;
+    for (int i = 0; i < listQuestion.length; i++) {
+      if (answer[i] == listQuestion[i].correctAnswer) {
+        score += (100 ~/ listQuestion.length);
+      }
+    }
+
+    final status = score >= 50 ? 'Passed' : 'Failed';
+
+    final dio = Dio();
+    try {
+      await dio.post(
+        'http://192.168.52.91:3000/api/results/add',
+        data: {
+          "name": name,
+          "score": score,
+          "status": status,
+          "date": DateTime.now().toIso8601String(),
+          "categoryId": widget.categoryId,
+          "questionId": widget.categoryId,
+          "userId": userId,
+        },
+        options: Options(headers: {
+          'Authorization': 'Bearer $token',
+        }),
+      );
+    } catch (e) {
+      print("Submit error: $e");
     }
   }
 

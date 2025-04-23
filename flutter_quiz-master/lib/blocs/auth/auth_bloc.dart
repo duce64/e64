@@ -36,6 +36,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           event.password,
           event.detail,
           event.department,
+          event.fullname,
         );
         emit(state.copyWith(status: AuthStatus.success));
       } catch (e) {

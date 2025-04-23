@@ -40,7 +40,7 @@ class AuthService {
   }
 
   Future<Map<String, dynamic>> register(String username, String password,
-      String detailUser, String department) async {
+      String detailUser, String department, String fullName) async {
     try {
       final response = await _dio.post(
         '/register',
@@ -50,6 +50,7 @@ class AuthService {
           'role': 'user',
           'detail': detailUser,
           'department': department,
+          'fullname': fullName
         },
       );
 

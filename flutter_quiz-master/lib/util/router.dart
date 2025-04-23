@@ -5,6 +5,7 @@ import 'package:flutterquiz/login/login_screen.dart';
 import 'package:flutterquiz/login/register_screen.dart';
 import 'package:flutterquiz/model/categories.dart';
 import 'package:flutterquiz/model/question.dart';
+import 'package:flutterquiz/screen/ExamResultScreenUser.dart';
 import 'package:flutterquiz/screen/QuestionPackageListScreenH.dart';
 import 'package:flutterquiz/screen/admin/AddQuestionPackageScreen.dart';
 import 'package:flutterquiz/screen/admin/ExamResultScreen.dart';
@@ -13,6 +14,7 @@ import 'package:flutterquiz/screen/admin/admin_screen.dart';
 import 'package:flutterquiz/screen/admin/category_admin_screen.dart';
 import 'package:flutterquiz/screen/admin/edit_category_screen.dart';
 import 'package:flutterquiz/screen/admin/manage_question_screen.dart';
+import 'package:flutterquiz/screen/admin/mangage_user_screen.dart';
 import 'package:flutterquiz/screen/admin/question_admin_screen.dart';
 import 'package:flutterquiz/screen/category_screen.dart';
 import 'package:flutterquiz/screen/dashboard.dart';
@@ -74,6 +76,9 @@ class Routerr {
                   ),
                   child: RegisterPage(),
                 ));
+      case ManageUserScreenss:
+        return MaterialPageRoute(
+            builder: (BuildContext context) => ManageUserScreen());
       case SplashScreen:
         return MaterialPageRoute(
             builder: (BuildContext context) => SplashPage());
@@ -101,8 +106,12 @@ class Routerr {
         return MaterialPageRoute(
             builder: (_) => QuizPageApi(
                   categoryId: args['categoryId']!,
+                  questionId: args['questionId']!,
                   // Pass the list of questions here
                 ));
+      case UserExamResultScreenss:
+        return MaterialPageRoute(
+            builder: (BuildContext context) => UserExamResultScreen());
       case QuestionPackageListScreens:
         final args = settings.arguments as Map<String, int>;
         return MaterialPageRoute(

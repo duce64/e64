@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutterquiz/screen/admin/ExamResultScreen.dart';
-import 'package:flutterquiz/screen/admin/question_admin_screen.dart';
 import 'package:flutterquiz/util/constant.dart';
 import 'package:flutterquiz/util/router_path.dart';
 
@@ -9,45 +7,38 @@ class AdminDashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isWideScreen = MediaQuery.of(context).size.width > 800;
+
     return Scaffold(
-      backgroundColor: Color(0xFFE9F1FB),
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            height: 50,
-            width: double.infinity,
-            color: Colors.white,
-            child: Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 20),
-                  child: Text(
-                    "Trang quản lý",
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: kItemSelectBottomNav),
-                  ),
-                ),
-                Spacer(),
-                Padding(
-                  padding: const EdgeInsets.only(right: 20),
-                  child: Icon(
-                    Icons.notifications,
-                    color: kItemSelectBottomNav,
-                    size: 30,
-                  ),
-                )
-              ],
-            ),
+      backgroundColor: const Color(0xFFE9F1FB),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 1,
+        title: const Text(
+          "📋 Trang quản trị",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: kTitleColor,
           ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.notifications, color: kItemSelectBottomNav),
+            onPressed: () {},
+          ),
+          const SizedBox(width: 16)
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1000),
             child: GridView.count(
-              crossAxisCount: 3,
-              crossAxisSpacing: 20,
-              mainAxisSpacing: 20,
+              crossAxisCount: isWideScreen ? 3 : 2,
+              crossAxisSpacing: 24,
+              mainAxisSpacing: 24,
+              childAspectRatio: 1.2,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               children: [
@@ -69,16 +60,24 @@ class AdminDashboardScreen extends StatelessWidget {
                 ),
                 _AdminMenuCard(
                   icon: Icons.bar_chart,
-                  title: "Xem kết quả thi",
-                  color: Colors.purple,
+                  title: "Kết quả thi",
+                  color: Colors.deepPurple,
                   onTap: () {
                     Navigator.pushNamed(context, ResultExamScreens);
+                  },
+                ),
+                _AdminMenuCard(
+                  icon: Icons.people,
+                  title: "Người dùng",
+                  color: Colors.blue,
+                  onTap: () {
+                    Navigator.pushNamed(context, ManageUserScreenss);
                   },
                 ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -102,21 +101,33 @@ class _AdminMenuCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
       child: Card(
+        elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        elevation: 5,
         color: Colors.white,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 50, color: color),
-            const SizedBox(height: 10),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            )
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                radius: 28,
+                backgroundColor: color.withOpacity(0.1),
+                child: Icon(icon, size: 32, color: color),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  color: kTitleColor,
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

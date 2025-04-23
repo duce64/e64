@@ -52,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }
 
         setState(() {
-          _userName = decoded['detail'] ?? '';
+          _userName = decoded['fullname'] ?? '';
           _department = decoded['department'] ?? '';
           _detail = decoded['role'] ?? '';
         });
