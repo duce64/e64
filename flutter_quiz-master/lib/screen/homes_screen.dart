@@ -21,6 +21,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<Category> _categories = [];
+  List<dynamic> _notifications = [];
   bool _isLoading = true;
   String _userName = '';
   String _department = '';
@@ -31,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _loadUserFromToken();
     _loadCategories();
+    _loadNotifications();
     Provider.of<QuestionProvider>(context, listen: false).initValue();
   }
 
@@ -57,6 +59,31 @@ class _HomeScreenState extends State<HomeScreen> {
           _detail = decoded['role'] ?? '';
         });
       }
+    }
+  }
+
+  Future<void> _loadNotifications() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      if (token == null) return;
+
+      final payload = base64Url.normalize(token.split('.')[1]);
+      final decoded = jsonDecode(utf8.decode(base64Url.decode(payload)));
+      final userId = decoded['userId'] ?? '';
+
+      final response = await http.get(
+        Uri.parse('http://192.168.52.91:3000/api/notifications/user/$userId'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _notifications = jsonDecode(response.body);
+        });
+      }
+    } catch (e) {
+      print("Lỗi khi tải thông báo: $e");
     }
   }
 
@@ -173,6 +200,107 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _showNotifications() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      backgroundColor: Colors.white,
+      isScrollControlled: true,
+      builder: (_) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "🔔 Thông báo",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: kItemSelectBottomNav,
+              ),
+            ),
+            const Divider(height: 24),
+            if (_notifications.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: Text(
+                    "Không có thông báo mới.",
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                ),
+              )
+            else
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _notifications.length,
+                  itemBuilder: (context, index) {
+                    final notif = _notifications[index];
+                    return InkWell(
+                      onTap: () {
+                        print("Clicked notification: ${notif['idCategory']}");
+                        print("Clicked notification: ${notif['idQuestion']}");
+                        Navigator.pushNamed(
+                          context,
+                          QuizScreenH,
+                          arguments: {
+                            'categoryId': notif['categoryId'],
+                            'questionId': notif['questionId'],
+                          },
+                        );
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0F4FF),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.blue.shade100),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.notifications_none,
+                                color: kItemSelectBottomNav),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    notif['content'] ?? '',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    notif['date'] ?? '',
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.grey,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              )
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -207,10 +335,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     )
                   ],
                 ),
-                IconButton(
-                  icon: Icon(Icons.logout, color: Colors.red),
-                  tooltip: 'Đăng xuất',
-                  onPressed: _logout,
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.notifications, color: Colors.blue),
+                      tooltip: 'Thông báo',
+                      onPressed: _showNotifications,
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.logout, color: Colors.red),
+                      tooltip: 'Đăng xuất',
+                      onPressed: _logout,
+                    ),
+                  ],
                 ),
               ],
             ),

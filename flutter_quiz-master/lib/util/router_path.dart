@@ -18,3 +18,6 @@ const String QuizScreenH = 'QuizScreenH';
 const String ResultExamScreens = 'ResultScreen';
 const String UserExamResultScreenss = 'UserExamResultScreens';
 const String ManageUserScreenss = 'ManageUserScreens';
+const String CreateExamScreens = 'CreateExamScreens';
+const String CreatedTestListScreens = 'CreatedTestListScreen';
+const String EditTestScreens = 'EditTestScreen';

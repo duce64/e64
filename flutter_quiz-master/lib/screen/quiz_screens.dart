@@ -172,29 +172,60 @@ class _QuizPageApiState extends State<QuizPageApi> {
 
   @override
   Widget build(BuildContext context) {
+    final currentQuestionText = listQuestion.isNotEmpty
+        ? listQuestion[currentIndex].question ?? 'Quiz'
+        : 'Quiz';
+
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: kItemSelectBottomNav,
-        title: const Text("Quiz"),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () {
-            buildDialog(
-              context,
-              "Warning!",
-              'Do you want to cancel this quiz?',
-              DialogType.warning,
-              () => Navigator.pop(context),
-              () => null,
-            );
-          },
-        ),
+      backgroundColor: const Color(0xFFE9F1FB),
+      body: Column(
+        children: [
+          Container(
+            height: 70,
+            width: double.infinity,
+            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back_ios, color: kTitleColor),
+                  onPressed: () {
+                    buildDialog(
+                      context,
+                      "Cảnh báo!",
+                      'Bạn có muốn thoát khỏi bài thi không?',
+                      DialogType.warning,
+                      () => Navigator.pop(context),
+                      () {},
+                    );
+                  },
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    currentQuestionText.length > 60
+                        ? currentQuestionText.substring(0, 60) + '...'
+                        : currentQuestionText,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: kTitleColor,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : error.isNotEmpty
+                    ? Center(child: Text(error))
+                    : buildQuizContent(),
+          ),
+        ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : error.isNotEmpty
-              ? Center(child: Text(error))
-              : buildQuizContent(),
     );
   }
 

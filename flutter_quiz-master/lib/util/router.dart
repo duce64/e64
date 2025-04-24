@@ -8,6 +8,8 @@ import 'package:flutterquiz/model/question.dart';
 import 'package:flutterquiz/screen/ExamResultScreenUser.dart';
 import 'package:flutterquiz/screen/QuestionPackageListScreenH.dart';
 import 'package:flutterquiz/screen/admin/AddQuestionPackageScreen.dart';
+import 'package:flutterquiz/screen/admin/CreateExamScreen.dart';
+import 'package:flutterquiz/screen/admin/CreatedTestListScreen.dart';
 import 'package:flutterquiz/screen/admin/ExamResultScreen.dart';
 import 'package:flutterquiz/screen/admin/addQuestionScreen.dart';
 import 'package:flutterquiz/screen/admin/admin_screen.dart';
@@ -82,10 +84,15 @@ class Routerr {
       case SplashScreen:
         return MaterialPageRoute(
             builder: (BuildContext context) => SplashPage());
-
+      case CreatedTestListScreens:
+        return MaterialPageRoute(
+            builder: (BuildContext context) => CreatedTestListScreen());
       case DashBoardScreen:
         return MaterialPageRoute(
             builder: (BuildContext context) => DashboardPage());
+      case CreateExamScreens:
+        return MaterialPageRoute(
+            builder: (BuildContext context) => CreateExamScreen());
       case AddQuestionPackageScreens:
         final args = settings.arguments as Map<String, int?>;
         return MaterialPageRoute(

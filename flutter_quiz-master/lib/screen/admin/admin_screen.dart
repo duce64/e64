@@ -74,6 +74,14 @@ class AdminDashboardScreen extends StatelessWidget {
                     Navigator.pushNamed(context, ManageUserScreenss);
                   },
                 ),
+                _AdminMenuCard(
+                  icon: Icons.people,
+                  title: "Tạo bài kiểm tra",
+                  color: Colors.blue,
+                  onTap: () {
+                    Navigator.pushNamed(context, CreateExamScreens);
+                  },
+                ),
               ],
             ),
           ),
