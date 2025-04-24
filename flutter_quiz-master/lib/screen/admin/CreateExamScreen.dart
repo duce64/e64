@@ -138,105 +138,169 @@ class _CreateExamScreenState extends State<CreateExamScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWide = screenWidth >= 800;
+
     return Scaffold(
+      backgroundColor: const Color(0xFFE9F1FB),
       appBar: AppBar(
-        title: const Text("Tạo bài kiểm tra"),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        elevation: 1,
+        iconTheme: IconThemeData(color: kItemSelectBottomNav),
+        title: Text(
+          "Tạo bài kiểm tra",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: kItemSelectBottomNav,
+          ),
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: ListView(
-          children: [
-            TextField(
-              controller: titleController,
-              decoration: const InputDecoration(
-                labelText: 'Tiêu đề bài kiểm tra',
-                border: OutlineInputBorder(),
-              ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Center(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 800),
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                )
+              ],
             ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: selectedDepartment,
-              items: departments
-                  .map((dep) => DropdownMenuItem(
-                        value: dep,
-                        child: Text(dep),
-                      ))
-                  .toList(),
-              onChanged: (val) {
-                setState(() {
-                  selectedDepartment = val;
-                  selectedUsers.clear();
-                });
-                if (val != null) fetchUsersByDepartment(val);
-              },
-              decoration: const InputDecoration(
-                labelText: 'Chọn ban',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            isLoadingUsers
-                ? const CircularProgressIndicator()
-                : MultiSelectDialogField(
-                    items: users
-                        .map((user) =>
-                            MultiSelectItem(user['_id'], user['fullname']))
-                        .toList(),
-                    title: const Text("Người cần kiểm tra"),
-                    buttonText: const Text("Chọn người cần kiểm tra"),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    listType: MultiSelectListType.LIST,
-                    onConfirm: (values) {
-                      setState(() {
-                        selectedUsers =
-                            values.map((e) => e.toString()).toList();
-                      });
-                    },
-                    chipDisplay: MultiSelectChipDisplay.none(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "THÊM BÀI KIỊM TRA",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueAccent,
                   ),
-            const SizedBox(height: 16),
-            isLoadingPackages
-                ? const CircularProgressIndicator()
-                : DropdownButtonFormField<int>(
-                    value: selectedPackage,
-                    items: questionPackages
-                        .map((pkg) => DropdownMenuItem<int>(
-                              value: pkg['idQuestion'],
-                              child: Text(pkg['name']),
-                            ))
-                        .toList(),
-                    onChanged: (val) => setState(() => selectedPackage = val),
-                    decoration: const InputDecoration(
-                      labelText: 'Chọn gói câu hỏi',
-                      border: OutlineInputBorder(),
+                ),
+                const SizedBox(height: 24),
+                TextField(
+                  controller: titleController,
+                  decoration: InputDecoration(
+                    labelText: 'Tiêu đề bài kiểm tra',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: selectedDepartment,
+                  items: departments
+                      .map((dep) => DropdownMenuItem(
+                            value: dep,
+                            child: Text(dep),
+                          ))
+                      .toList(),
+                  onChanged: (val) {
+                    setState(() {
+                      selectedDepartment = val;
+                      selectedUsers.clear();
+                    });
+                    if (val != null) fetchUsersByDepartment(val);
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Chọn ban',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                isLoadingUsers
+                    ? const CircularProgressIndicator()
+                    : MultiSelectDialogField(
+                        items: users
+                            .map((user) =>
+                                MultiSelectItem(user['_id'], user['fullname']))
+                            .toList(),
+                        title: const Text("Người cần kiểm tra"),
+                        buttonText: const Text("Chọn người cần kiểm tra"),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        listType: MultiSelectListType.LIST,
+                        onConfirm: (values) {
+                          setState(() {
+                            selectedUsers =
+                                values.map((e) => e.toString()).toList();
+                          });
+                        },
+                        chipDisplay: MultiSelectChipDisplay.none(),
+                      ),
+                const SizedBox(height: 16),
+                isLoadingPackages
+                    ? const CircularProgressIndicator()
+                    : DropdownButtonFormField<int>(
+                        value: selectedPackage,
+                        items: questionPackages
+                            .map((pkg) => DropdownMenuItem<int>(
+                                  value: pkg['idQuestion'],
+                                  child: Text(pkg['name']),
+                                ))
+                            .toList(),
+                        onChanged: (val) =>
+                            setState(() => selectedPackage = val),
+                        decoration: InputDecoration(
+                          labelText: 'Chọn gói câu hỏi',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[100],
+                        ),
+                      ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: deadlineController,
+                  readOnly: true,
+                  onTap: () => selectDate(context),
+                  decoration: InputDecoration(
+                    labelText: 'Hạn chót',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    suffixIcon: const Icon(Icons.calendar_today),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: createTest,
+                    icon: const Icon(Icons.send),
+                    label: const Text("Tạo bài kiểm tra"),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 16),
+                      backgroundColor: kItemSelectBottomNav,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: deadlineController,
-              readOnly: true,
-              onTap: () => selectDate(context),
-              decoration: const InputDecoration(
-                labelText: 'Hạn chót',
-                border: OutlineInputBorder(),
-                suffixIcon: Icon(Icons.calendar_today),
-              ),
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: createTest,
-              icon: const Icon(Icons.send),
-              label: const Text("Tạo bài kiểm tra"),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 48),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

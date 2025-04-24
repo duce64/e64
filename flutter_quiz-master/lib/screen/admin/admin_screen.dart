@@ -23,10 +23,11 @@ class AdminDashboardScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications, color: kItemSelectBottomNav),
+            icon: Icon(Icons.notifications_active_outlined,
+                color: kItemSelectBottomNav),
             onPressed: () {},
           ),
-          const SizedBox(width: 16)
+          const SizedBox(width: 16),
         ],
       ),
       body: Padding(
@@ -43,44 +44,36 @@ class AdminDashboardScreen extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               children: [
                 _AdminMenuCard(
-                  icon: Icons.category,
+                  icon: Icons.category_outlined,
                   title: "Quản lý danh mục",
                   color: Colors.orange,
-                  onTap: () {
-                    Navigator.of(context).pushNamed(CategoryManagerScreens);
-                  },
+                  onTap: () =>
+                      Navigator.of(context).pushNamed(CategoryManagerScreens),
                 ),
                 _AdminMenuCard(
-                  icon: Icons.quiz,
+                  icon: Icons.quiz_outlined,
                   title: "Quản lý câu hỏi",
                   color: Colors.green,
-                  onTap: () {
-                    Navigator.of(context).pushNamed(ManageQuestionScreens);
-                  },
+                  onTap: () =>
+                      Navigator.of(context).pushNamed(ManageQuestionScreens),
                 ),
                 _AdminMenuCard(
-                  icon: Icons.bar_chart,
+                  icon: Icons.bar_chart_outlined,
                   title: "Kết quả thi",
                   color: Colors.deepPurple,
-                  onTap: () {
-                    Navigator.pushNamed(context, ResultExamScreens);
-                  },
+                  onTap: () => Navigator.pushNamed(context, ResultExamScreens),
                 ),
                 _AdminMenuCard(
-                  icon: Icons.people,
+                  icon: Icons.group_outlined,
                   title: "Người dùng",
                   color: Colors.blue,
-                  onTap: () {
-                    Navigator.pushNamed(context, ManageUserScreenss);
-                  },
+                  onTap: () => Navigator.pushNamed(context, ManageUserScreenss),
                 ),
                 _AdminMenuCard(
-                  icon: Icons.people,
+                  icon: Icons.assignment_turned_in_outlined,
                   title: "Tạo bài kiểm tra",
-                  color: Colors.blue,
-                  onTap: () {
-                    Navigator.pushNamed(context, CreateExamScreens);
-                  },
+                  color: Colors.teal,
+                  onTap: () => Navigator.pushNamed(context, CreateExamScreens),
                 ),
               ],
             ),
@@ -102,42 +95,57 @@ class _AdminMenuCard extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.onTap,
-    this.color = Colors.blue,
+    required this.color,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        color: Colors.white,
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: 28,
-                backgroundColor: color.withOpacity(0.1),
-                child: Icon(icon, size: 32, color: color),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                  color: kTitleColor,
+    return TweenAnimationBuilder<double>(
+      duration: const Duration(milliseconds: 250),
+      tween: Tween(begin: 1.0, end: 1.0),
+      builder: (context, scale, child) {
+        return InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          splashColor: color.withOpacity(0.2),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withOpacity(0.08),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                )
+              ],
+              color: Colors.white,
+            ),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 28,
+                  backgroundColor: color.withOpacity(0.1),
+                  child: Icon(icon, size: 30, color: color),
                 ),
-              )
-            ],
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: kTitleColor,
+                  ),
+                )
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

@@ -48,16 +48,16 @@ class _ManageCategoryScreenState extends State<ManageCategoryScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Xác nhận xoá'),
-        content: Text('Bạn có chắc chắn muốn xoá danh mục này?'),
+        title: const Text('Xác nhận xoá'),
+        content: const Text('Bạn có chắc chắn muốn xoá danh mục này?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text('Huỷ'),
+            child: const Text('Huỷ'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text('Xoá'),
+            child: const Text('Xoá'),
           ),
         ],
       ),
@@ -98,7 +98,7 @@ class _ManageCategoryScreenState extends State<ManageCategoryScreen> {
         elevation: 1,
         iconTheme: IconThemeData(color: kItemSelectBottomNav),
         title: Text(
-          "Quản lý danh mục",
+          "📂 Quản lý danh mục",
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -113,38 +113,58 @@ class _ManageCategoryScreenState extends State<ManageCategoryScreen> {
               itemCount: _categories.length,
               itemBuilder: (context, index) {
                 final category = _categories[index];
-                return Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 3,
+                return Container(
                   margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.15),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      )
+                    ],
+                  ),
                   child: ListTile(
-                    contentPadding: const EdgeInsets.all(12),
-                    leading: CircleAvatar(
-                      backgroundImage:
-                          MemoryImage(base64Decode(category.image)),
-                      radius: 24,
-                      backgroundColor: kItemSelectBottomNav.withOpacity(0.1),
+                    contentPadding: const EdgeInsets.all(16),
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.memory(
+                        base64Decode(category.image),
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                     title: Text(
                       category.name,
                       style: const TextStyle(
-                        fontWeight: FontWeight.bold,
                         fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
                       ),
                     ),
-                    trailing: Wrap(
-                      spacing: 8,
+                    subtitle: const Text(
+                      "Danh mục câu hỏi",
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        IconButton(
-                          icon:
-                              const Icon(Icons.edit, color: Colors.blueAccent),
-                          onPressed: () => _navigateToEdit(category),
+                        Tooltip(
+                          message: "Chỉnh sửa",
+                          child: IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => _navigateToEdit(category),
+                          ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _deleteCategory(category.id),
+                        Tooltip(
+                          message: "Xoá",
+                          child: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _deleteCategory(category.id),
+                          ),
                         ),
                       ],
                     ),
@@ -152,13 +172,14 @@ class _ManageCategoryScreenState extends State<ManageCategoryScreen> {
                 );
               },
             ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.pushNamed(context, AddCategoryScreens).then((_) {
             _loadCategories();
           });
         },
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text("Thêm danh mục"),
         backgroundColor: Colors.blue,
       ),
     );

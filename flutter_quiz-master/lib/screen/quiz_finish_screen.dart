@@ -47,53 +47,65 @@ class _QuizFinishPageState extends State<QuizFinishPage> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: const Color(0xFFF4F6FA),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 1,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: kTitleColor),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Kết quả bài thi',
+          style: TextStyle(color: kTitleColor, fontWeight: FontWeight.bold),
+        ),
+      ),
       body: Center(
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 800),
+          constraints: const BoxConstraints(maxWidth: 700),
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(32),
+            padding: const EdgeInsets.all(24),
             child: Card(
-              elevation: 8,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 6,
               child: Padding(
-                padding: const EdgeInsets.all(32.0),
+                padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset('assets/congratulate.png', width: 200),
+                    Image.asset('assets/congratulate.png', width: 180),
                     const SizedBox(height: 24),
                     Text(
-                      "Your Score: $score",
-                      style: kHeadingTextStyleAppBar.copyWith(
-                          fontSize: 26, color: Colors.red),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      "You have successfully completed",
-                      style: TextStyle(fontSize: 18),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      widget.title ?? '',
+                      widget.title ?? 'Bài kiểm tra',
                       style: kHeadingTextStyleAppBar.copyWith(fontSize: 24),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
+                    Text(
+                      "Điểm số của bạn: $score",
+                      style: const TextStyle(
+                        fontSize: 22,
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
                     Wrap(
-                      spacing: 16,
+                      spacing: 12,
                       runSpacing: 12,
                       alignment: WrapAlignment.center,
                       children: [
-                        _buildStatChip(
-                            Icons.check, "$correct correct", Colors.green),
-                        _buildStatChip(
-                            Icons.close, "$incorrect incorrect", Colors.red),
+                        _buildStatCard(
+                            Icons.check_circle, "$correct đúng", Colors.green),
+                        _buildStatCard(
+                            Icons.cancel, "$incorrect sai", Colors.red),
+                        _buildStatCard(
+                            Icons.help_outline,
+                            "${widget.listQuestion!.length} câu",
+                            Colors.blueGrey),
                       ],
                     ),
                     const SizedBox(height: 30),
@@ -101,7 +113,7 @@ class _QuizFinishPageState extends State<QuizFinishPage> {
                       children: [
                         Expanded(
                           child: Button(
-                            title: 'Show Question',
+                            title: 'Xem chi tiết',
                             onTap: () {
                               Navigator.push(
                                 context,
@@ -115,22 +127,15 @@ class _QuizFinishPageState extends State<QuizFinishPage> {
                             },
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Button(
-                            title: 'Save Score',
-                            onTap: _buildDialogSaveScore,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Button(
-                            title: 'Home',
+                            title: 'Trang chủ',
                             onTap: () {
                               Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (_) => DashboardPage()),
+                                    builder: (_) => const DashboardPage()),
                                 (route) => false,
                               );
                             },
@@ -148,19 +153,20 @@ class _QuizFinishPageState extends State<QuizFinishPage> {
     );
   }
 
-  Widget _buildStatChip(IconData icon, String text, Color color) {
-    return Chip(
-      elevation: 4,
-      backgroundColor: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+  Widget _buildStatCard(IconData icon, String label, Color color) {
+    return Card(
+      elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: color),
-          const SizedBox(width: 6),
-          Text(text, style: TextStyle(fontSize: 16)),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color),
+            const SizedBox(width: 8),
+            Text(label, style: const TextStyle(fontSize: 16)),
+          ],
+        ),
       ),
     );
   }
@@ -179,14 +185,14 @@ class _QuizFinishPageState extends State<QuizFinishPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Save Score',
+                  'Lưu điểm số',
                   style: kHeadingTextStyleAppBar.copyWith(fontSize: 20),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: nameController,
                   decoration: const InputDecoration(
-                    hintText: "Your Name",
+                    hintText: "Tên của bạn",
                     prefixIcon: Icon(Icons.person),
                     border: OutlineInputBorder(),
                   ),
@@ -194,11 +200,13 @@ class _QuizFinishPageState extends State<QuizFinishPage> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    Text("Your Score: ", style: TextStyle(fontSize: 16)),
+                    const Text("Tổng điểm: ", style: TextStyle(fontSize: 16)),
                     Text(
                       "$score",
-                      style: kHeadingTextStyleAppBar.copyWith(
-                          fontSize: 18, color: Colors.red),
+                      style: const TextStyle(
+                          fontSize: 18,
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -208,20 +216,9 @@ class _QuizFinishPageState extends State<QuizFinishPage> {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text("Cancel"),
+                      child: const Text("Huỷ"),
                     ),
                     const SizedBox(width: 12),
-                    ElevatedButton(
-                      onPressed: _saveScore,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: kItemSelectBottomNav,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text("Save",
-                          style: TextStyle(color: Colors.white)),
-                    ),
                   ],
                 ),
               ],
@@ -245,7 +242,7 @@ class _QuizFinishPageState extends State<QuizFinishPage> {
     );
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (_) => DashboardPage()),
+      MaterialPageRoute(builder: (_) => const DashboardPage()),
       (route) => false,
     );
   }

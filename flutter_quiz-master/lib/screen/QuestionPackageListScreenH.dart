@@ -149,6 +149,8 @@ class _QuestionPackageListScreenState extends State<QuestionPackageListScreen> {
                           arguments: {
                             'categoryId': widget.categoryId,
                             'questionId': pkg['idQuestion'],
+                            'idTest': 'null',
+                            'isTest': false,
                           },
                         ).then((_) => _fetchPackages());
                       },

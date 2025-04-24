@@ -59,7 +59,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Thêm category thành công')),
         );
-        Navigator.pop(context); // quay lại sau khi thêm
+        Navigator.pop(context);
       } else {
         print(response.body);
         throw Exception('Lỗi server');
@@ -79,106 +79,114 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
-        iconTheme: IconThemeData(color: kItemSelectBottomNav),
-        title: Text(
+        iconTheme: const IconThemeData(color: Colors.black),
+        title: const Text(
           "Thêm danh mục",
           style: TextStyle(
-            color: kItemSelectBottomNav,
+            color: Colors.black,
             fontWeight: FontWeight.bold,
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Center(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 600),
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
-                )
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  "THÊM DANH MỤC",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blueAccent,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                TextField(
-                  controller: _titleController,
-                  decoration: InputDecoration(
-                    labelText: 'Tên danh mục',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[100],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                GestureDetector(
-                  onTap: _pickImage,
-                  child: _base64Image != null
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: AspectRatio(
-                            aspectRatio: 16 / 9,
-                            child: Image.memory(
-                              Uint8List.fromList(base64Decode(_base64Image!)),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        )
-                      : Container(
-                          height: 180,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            color: Colors.grey[100],
-                            border: Border.all(color: Colors.grey),
-                          ),
-                          child: const Center(
-                            child:
-                                Icon(Icons.image, size: 50, color: Colors.grey),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 900),
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  )
+                ],
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Thông tin danh mục",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 32, vertical: 16),
-                      backgroundColor: kItemSelectBottomNav,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: _titleController,
+                          decoration: InputDecoration(
+                            labelText: 'Tên danh mục',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[100],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton.icon(
+                          onPressed: _submitCategory,
+                          icon: const Icon(Icons.add),
+                          label: const Text(
+                            "Thêm danh mục",
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: kItemSelectBottomNav,
+                            minimumSize: const Size.fromHeight(50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    icon: const Icon(Icons.add),
-                    label: const Text(
-                      "Thêm danh mục",
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    onPressed: _submitCategory,
                   ),
-                )
-              ],
+                  const SizedBox(width: 24),
+                  Expanded(
+                    flex: 1,
+                    child: GestureDetector(
+                      onTap: _pickImage,
+                      child: _base64Image != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: AspectRatio(
+                                aspectRatio: 4 / 3,
+                                child: Image.memory(
+                                  Uint8List.fromList(
+                                      base64Decode(_base64Image!)),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            )
+                          : Container(
+                              height: 160,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: Colors.grey[100],
+                                border: Border.all(color: Colors.grey),
+                              ),
+                              child: const Center(
+                                child: Icon(Icons.image,
+                                    size: 48, color: Colors.grey),
+                              ),
+                            ),
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
         ),

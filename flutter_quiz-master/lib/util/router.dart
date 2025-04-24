@@ -114,6 +114,8 @@ class Routerr {
             builder: (_) => QuizPageApi(
                   categoryId: args['categoryId']!,
                   questionId: args['questionId']!,
+                  idTest: args['idTest']!,
+                  isTest: args['isTest']!,
                   // Pass the list of questions here
                 ));
       case UserExamResultScreenss:

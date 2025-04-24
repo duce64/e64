@@ -13,11 +13,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 class QuizPageApi extends StatefulWidget {
   final int categoryId;
   final int questionId;
-
+  final bool isTest;
+  final String idTest;
   const QuizPageApi({
     Key? key,
     required this.categoryId,
     required this.questionId,
+    required this.isTest,
+    required this.idTest,
   }) : super(key: key);
 
   @override
@@ -143,6 +146,7 @@ class _QuizPageApiState extends State<QuizPageApi> {
     final status = score >= 50 ? 'Passed' : 'Failed';
 
     final dio = Dio();
+    print('Submitting result...${widget.idTest} ${widget.isTest}');
     try {
       await dio.post(
         'http://192.168.52.91:3000/api/results/add',
@@ -154,6 +158,8 @@ class _QuizPageApiState extends State<QuizPageApi> {
           "categoryId": widget.categoryId,
           "questionId": widget.categoryId,
           "userId": userId,
+          "isTest": widget.isTest,
+          "testId": widget.idTest,
         },
         options: Options(headers: {
           'Authorization': 'Bearer $token',

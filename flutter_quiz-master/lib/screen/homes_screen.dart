@@ -240,18 +240,159 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: _notifications.length,
                   itemBuilder: (context, index) {
                     final notif = _notifications[index];
+                    final bool isRead = notif['isRead'] == true;
+
                     return InkWell(
-                      onTap: () {
-                        print("Clicked notification: ${notif['idCategory']}");
-                        print("Clicked notification: ${notif['idQuestion']}");
-                        Navigator.pushNamed(
-                          context,
-                          QuizScreenH,
-                          arguments: {
-                            'categoryId': notif['categoryId'],
-                            'questionId': notif['questionId'],
-                          },
+                      onTap: () async {
+                        final prefs = await SharedPreferences.getInstance();
+                        final token = prefs.getString('auth_token');
+                        if (token == null) return;
+
+                        final payload =
+                            base64Url.normalize(token.split('.')[1]);
+                        final decoded =
+                            jsonDecode(utf8.decode(base64Url.decode(payload)));
+                        final userId = decoded['userId'];
+                        final questionId = notif['questionId'];
+
+                        // ✅ Đánh dấu đã đọc
+                        await http.put(
+                          Uri.parse(
+                              'http://192.168.52.91:3000/api/notifications/${notif['_id']}/read'),
+                          headers: {'Authorization': 'Bearer $token'},
                         );
+
+                        _loadNotifications();
+
+                        final expiredDateStr = notif['expiredDate'];
+                        final expiredDate = expiredDateStr != null
+                            ? DateTime.tryParse(expiredDateStr)
+                            : null;
+                        final isExpired = expiredDate != null
+                            ? expiredDate.isBefore(DateTime.now())
+                            : true;
+
+                        final checkRes = await http.get(
+                          Uri.parse(
+                              'http://192.168.52.91:3000/api/results/check?userId=$userId&testId=${notif['_id']}'),
+                          headers: {'Authorization': 'Bearer $token'},
+                        );
+
+                        final checkData = jsonDecode(checkRes.body);
+
+                        if (checkRes.statusCode == 200 &&
+                            checkData['hasTaken'] == false &&
+                            !isExpired) {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => Dialog(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20)),
+                              child: Padding(
+                                padding: const EdgeInsets.all(20.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.play_circle_fill,
+                                        color: Colors.blue, size: 48),
+                                    const SizedBox(height: 12),
+                                    const Text(
+                                      "Bạn có muốn bắt đầu bài kiểm tra này ngay bây giờ không?",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    const SizedBox(height: 24),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, false),
+                                          child: const Text("Huỷ"),
+                                        ),
+                                        ElevatedButton.icon(
+                                          onPressed: () =>
+                                              Navigator.pop(context, true),
+                                          icon: const Icon(Icons.check),
+                                          label: const Text("Bắt đầu"),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+
+                          if (confirm == true) {
+                            Navigator.pushNamed(
+                              context,
+                              QuizScreenH,
+                              arguments: {
+                                'categoryId': notif['categoryId'],
+                                'questionId': notif['questionId'],
+                                'idTest': '${notif['_id']}',
+                                'isTest': true,
+                              },
+                            );
+                          }
+                        } else if (isExpired) {
+                          showDialog(
+                            context: context,
+                            builder: (_) => Dialog(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16)),
+                              child: Padding(
+                                padding: const EdgeInsets.all(20),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.timer_off,
+                                        color: Colors.redAccent, size: 48),
+                                    const SizedBox(height: 12),
+                                    const Text("Bài kiểm tra này đã hết hạn.",
+                                        style: TextStyle(fontSize: 16)),
+                                    const SizedBox(height: 16),
+                                    ElevatedButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text("Đóng"),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        } else {
+                          showDialog(
+                            context: context,
+                            builder: (_) => Dialog(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16)),
+                              child: Padding(
+                                padding: const EdgeInsets.all(20),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.info_outline,
+                                        color: Colors.orange, size: 48),
+                                    const SizedBox(height: 12),
+                                    const Text(
+                                        "Bạn đã hoàn thành bài kiểm tra này.",
+                                        style: TextStyle(fontSize: 16)),
+                                    const SizedBox(height: 16),
+                                    ElevatedButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text("Đóng"),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        }
                       },
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 12),
@@ -262,9 +403,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           border: Border.all(color: Colors.blue.shade100),
                         ),
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.notifications_none,
-                                color: kItemSelectBottomNav),
+                            Icon(Icons.notifications,
+                                size: 30, color: kItemSelectBottomNav),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
@@ -272,22 +414,78 @@ class _HomeScreenState extends State<HomeScreen> {
                                 children: [
                                   Text(
                                     notif['content'] ?? '',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 16,
-                                      fontWeight: FontWeight.w500,
+                                      fontWeight: isRead
+                                          ? FontWeight.normal
+                                          : FontWeight.bold,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    notif['date'] ?? '',
+                                    formatDate(notif['date']),
                                     style: const TextStyle(
                                       fontSize: 13,
                                       color: Colors.grey,
                                     ),
-                                  )
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Ngày hết hạn: ${formatDate(notif['expiredDate'] ?? '')}',
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.redAccent,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
                                 ],
                               ),
-                            )
+                            ),
+                            if (isRead)
+                              AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 300),
+                                transitionBuilder: (child, animation) =>
+                                    SlideTransition(
+                                  position: Tween<Offset>(
+                                    begin: const Offset(1, 0),
+                                    end: Offset.zero,
+                                  ).animate(animation),
+                                  child: FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  ),
+                                ),
+                                child: isRead
+                                    ? Container(
+                                        key: const ValueKey("read"),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green.shade50,
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          border:
+                                              Border.all(color: Colors.green),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: const [
+                                            Icon(Icons.check_circle,
+                                                color: Colors.green, size: 16),
+                                            SizedBox(width: 6),
+                                            Text(
+                                              "Đã đọc",
+                                              style: TextStyle(
+                                                color: Colors.green,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 13.5,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    : const SizedBox.shrink(),
+                              ),
                           ],
                         ),
                       ),
@@ -337,10 +535,40 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 Row(
                   children: [
-                    IconButton(
-                      icon: Icon(Icons.notifications, color: Colors.blue),
-                      tooltip: 'Thông báo',
-                      onPressed: _showNotifications,
+                    Stack(
+                      alignment: Alignment.topRight,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.notifications,
+                              color: Colors.blue, size: 30),
+                          tooltip: 'Thông báo',
+                          onPressed: _showNotifications,
+                        ),
+                        if (_notifications.isNotEmpty)
+                          Positioned(
+                            right: 6,
+                            top: 6,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              constraints: const BoxConstraints(
+                                  minWidth: 18, minHeight: 18),
+                              child: Text(
+                                '${_notifications.length}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          )
+                      ],
                     ),
                     IconButton(
                       icon: Icon(Icons.logout, color: Colors.red),
@@ -416,5 +644,19 @@ class _HomeScreenState extends State<HomeScreen> {
             id: id,
           );
         });
+  }
+}
+
+String formatDate(String isoDate) {
+  try {
+    final date = DateTime.parse(isoDate);
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final year = date.year.toString();
+    final hour = date.hour.toString().padLeft(2, '0');
+    final minute = date.minute.toString().padLeft(2, '0');
+    return "$day/$month/$year $hour:$minute";
+  } catch (e) {
+    return isoDate; // fallback nếu lỗi
   }
 }
