@@ -1,17 +1,18 @@
-# Dockerfile
-
-# Flutter SDK base image
+# Dựa trên image có sẵn Flutter
 FROM cirrusci/flutter:stable
 
-# Set working directory
+# Set thư mục làm việc
 WORKDIR /app
 
-# Copy all files
+# Copy toàn bộ project vào container
 COPY . .
 
-# Run build
+# Build web app
+RUN flutter pub get
 RUN flutter build web
 
-# Use simple web server (e.g. python http.server)
+# Mở port 80
 EXPOSE 80
+
+# Chạy web server đơn giản
 CMD ["python3", "-m", "http.server", "80", "--directory", "build/web"]
